@@ -14,7 +14,7 @@ void main() {
     win.show();
 
     // Устанавливаем иконку для окна
-    win.setIcon('assets/icon.ico');
+    win.setIcon('assets/app_ico.ico');
   });
 }
 
@@ -23,6 +23,8 @@ extension on DesktopWindow {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,13 +35,15 @@ class MyApp extends StatelessWidget {
 }
 
 class ShutdownScheduler extends StatefulWidget {
+  const ShutdownScheduler({super.key});
+
   @override
   _ShutdownSchedulerState createState() => _ShutdownSchedulerState();
 }
 
 class _ShutdownSchedulerState extends State<ShutdownScheduler>
     with TrayListener {
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
   @override
@@ -51,9 +55,7 @@ class _ShutdownSchedulerState extends State<ShutdownScheduler>
 
   // Инициализация меню в системном трее
   void _initTray() async {
-    await trayManager.setIcon(
-      'assets/icon.ico',
-    ); // Устанавливаем иконку для трея
+    await trayManager.setIcon('assets/app_ico.ico');
     trayManager.setToolTip("Меню управления");
 
     // Создание элементов меню для трея
