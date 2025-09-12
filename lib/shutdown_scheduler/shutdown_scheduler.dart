@@ -16,6 +16,7 @@ class ShutdownScheduler extends StatefulWidget {
 class _ShutdownSchedulerState extends State<ShutdownScheduler> with TrayListener {
   final TextEditingController _controller = TextEditingController();
   final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+  bool isDarkmode = false; 
 
   @override
   void initState() {
@@ -69,6 +70,62 @@ class _ShutdownSchedulerState extends State<ShutdownScheduler> with TrayListener
       backgroundColor: const Color(0xFF2C2C2C),
       appBar: AppBar(
         title: const Text('Меню управления', style: TextStyle(color: Colors.white)),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.orange),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return Dialog( // вместо AlertDialog — Dialog даёт больше свободы
+                        backgroundColor: const Color.fromARGB(255, 255, 255, 255), // фон прозрачный у самого диалога
+                        insetPadding: const EdgeInsets.all(20),
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2C2C2C), // фон окна
+                            borderRadius: BorderRadius.circular(21), // скругления
+                            border: Border.all(
+                              color: Colors.orange, // цвет рамки
+                              width: 3,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Настройки',
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text('Тут твои настройки', style: TextStyle(color: Colors.white)),
+                              Switch(value: isDarkmode, activeColor: Colors.orange, onChanged: (val) {
+                                setState(() => isDarkmode = val);
+                              }),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: const Text('Закрыть', style: TextStyle(color:  Color(0xFF2C2C2C) )),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          )
+        ],
         backgroundColor: const Color(0xFF1F1F1F),
         centerTitle: true,
       ),
