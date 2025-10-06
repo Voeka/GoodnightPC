@@ -1,10 +1,7 @@
 import 'dart:io';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tray_manager/tray_manager.dart';
 import 'shutdown_buttons.dart';
-import '../utils/toast.dart';
 
 class ShutdownScheduler extends StatefulWidget {
   const ShutdownScheduler({super.key});
@@ -13,54 +10,33 @@ class ShutdownScheduler extends StatefulWidget {
   _ShutdownSchedulerState createState() => _ShutdownSchedulerState();
 }
 
-class _ShutdownSchedulerState extends State<ShutdownScheduler> with TrayListener {
+class _ShutdownSchedulerState extends State<ShutdownScheduler> {
   final TextEditingController _controller = TextEditingController();
   final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
   bool isDarkmode = false; 
 
-  @override
-  void initState() {
-    super.initState();
-    _initTray();
-    trayManager.addListener(this);
-  }
-
-  // Настройка меню трея
-  void _initTray() async {
-    await trayManager.setIcon('assets/app_ico.ico');
-    trayManager.setToolTip("Меню управления");
-
-    final menu = Menu(
-      items: [
-        MenuItem(label: 'Открыть', key: 'open'),
-        MenuItem(label: 'Выход', key: 'exit'),
-      ],
-    );
-
-    await trayManager.setContextMenu(menu);
-  }
-
   void scheduleShutdown(int seconds) {
     Process.run('shutdown', ['/s', '/t', '$seconds']).then((_) {
-      showCustomToast(scaffoldKey, 'Выключение через ${seconds ~/ 60} минут');
+      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(content: Text('Выключение через ${seconds ~/ 60} минут')),
+      );
     }).catchError((error) {
-      showCustomToast(scaffoldKey, 'Ошибка: $error');
+      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(content: Text('Ошибка: $error')),
+      );
     });
   }
 
   void cancelShutdown() {
     Process.run('shutdown', ['/a']).then((_) {
-      showCustomToast(scaffoldKey, 'Выключение отменено');
+      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
+        const SnackBar(content: Text('Выключение отменено')),
+      );
     }).catchError((error) {
-      showCustomToast(scaffoldKey, 'Ошибка: $error');
+      ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(content: Text('Ошибка: $error')),
+      );
     });
-  }
-
-  @override
-  void dispose() {
-    trayManager.removeListener(this);
-    trayManager.destroy();
-    super.dispose();
   }
 
   @override
@@ -70,62 +46,62 @@ class _ShutdownSchedulerState extends State<ShutdownScheduler> with TrayListener
       backgroundColor: const Color(0xFF2C2C2C),
       appBar: AppBar(
         title: const Text('Меню управления', style: TextStyle(color: Colors.white)),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.orange),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return Dialog( // вместо AlertDialog — Dialog даёт больше свободы
-                        backgroundColor: const Color.fromARGB(255, 255, 255, 255), // фон прозрачный у самого диалога
-                        insetPadding: const EdgeInsets.all(20),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2C2C2C), // фон окна
-                            borderRadius: BorderRadius.circular(21), // скругления
-                            border: Border.all(
-                              color: Colors.orange, // цвет рамки
-                              width: 3,
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text(
-                                'Настройки',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                              ),
-                              const SizedBox(height: 20),
-                              const Text('Тут твои настройки', style: TextStyle(color: Colors.white)),
-                              Switch(value: isDarkmode, activeColor: Colors.orange, onChanged: (val) {
-                                setState(() => isDarkmode = val);
-                              }),
-                              const SizedBox(height: 20),
-                              ElevatedButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: const Text('Закрыть', style: TextStyle(color:  Color(0xFF2C2C2C) )),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          )
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: const Icon(Icons.settings, color: Colors.orange),
+        //     onPressed: () {
+        //       showDialog(
+        //         context: context,
+        //         builder: (BuildContext context) {
+        //           return StatefulBuilder(
+        //             builder: (BuildContext context, StateSetter setState) {
+        //               return Dialog(
+        //                 backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        //                 insetPadding: const EdgeInsets.all(20),
+        //                 child: Container(
+        //                   padding: const EdgeInsets.all(20),
+        //                   decoration: BoxDecoration(
+        //                     color: const Color(0xFF2C2C2C),
+        //                     borderRadius: BorderRadius.circular(21),
+        //                     border: Border.all(
+        //                       color: Colors.orange,
+        //                       width: 3,
+        //                     ),
+        //                   ),
+        //                   child: Column(
+        //                     mainAxisSize: MainAxisSize.min,
+        //                     children: [
+        //                       const Text(
+        //                         'Настройки',
+        //                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+        //                       ),
+        //                       const SizedBox(height: 20),
+        //                       const Text('Тут твои настройки', style: TextStyle(color: Colors.white)),
+        //                       Switch(value: isDarkmode, activeColor: Colors.orange, onChanged: (val) {
+        //                         setState(() => isDarkmode = val);
+        //                       }),
+        //                       const SizedBox(height: 20),
+        //                       ElevatedButton(
+        //                         onPressed: () => Navigator.of(context).pop(),
+        //                         style: ElevatedButton.styleFrom(
+        //                           backgroundColor: Colors.orange,
+        //                           shape: RoundedRectangleBorder(
+        //                             borderRadius: BorderRadius.circular(20),
+        //                           ),
+        //                         ),
+        //                         child: const Text('Закрыть', style: TextStyle(color:  Color(0xFF2C2C2C) )),
+        //                       ),
+        //                     ],
+        //                   ),
+        //                 ),
+        //               );
+        //             },
+        //           );
+        //         },
+        //       );
+        //     },
+        //   )
+        // ],
         backgroundColor: const Color(0xFF1F1F1F),
         centerTitle: true,
       ),
@@ -167,7 +143,9 @@ class _ShutdownSchedulerState extends State<ShutdownScheduler> with TrayListener
                   if (minutes > 0) {
                     scheduleShutdown(minutes * 60);
                   } else {
-                    showCustomToast(scaffoldKey, 'Введите корректное число минут');
+                    ScaffoldMessenger.of(scaffoldKey.currentContext!).showSnackBar(
+                      const SnackBar(content: Text('Введите корректное число минут')),
+                    );
                   }
                 },
               ),
@@ -181,19 +159,5 @@ class _ShutdownSchedulerState extends State<ShutdownScheduler> with TrayListener
         ),
       ),
     );
-  }
-
-  // Обработка клика по значку трея
-  @override
-  void onTrayIconMouseDown() => appWindow.show();
-
-  // Обработка клика по пунктам меню трея
-  @override
-  void onTrayMenuItemClick(MenuItem menuItem) {
-    if (menuItem.key == 'open') {
-      appWindow.show();
-    } else if (menuItem.key == 'exit') {
-      exit(0);
-    }
   }
 }
